@@ -22,6 +22,10 @@ public class App
     	String 	targetQueue 	= System.getenv("TARGET_QUEUE");
     	String  brokerUID		= System.getenv("BROKER_ADMIN_UID");
     	String  brokerPassword  = System.getenv("BROKER_ADMIN_PASSWD");
+    	
+    	// Variables introduced for countint incoming and outgoing messages
+    	int numberIncomingMessages = 0;
+    	int numberOutgoingMessage = 0;
 
         System.out.println("TARGET_AMQ_BROKER = " + targetAMQBroker);
     
@@ -40,6 +44,8 @@ public class App
 		while ( true ) {
 			messageFromQueue = consumer.run(20000);		
 			
+			numberIncomingMessages++;
+			
 			if ( messageFromQueue != null ) {
 				
 	            // Convert TextMessage to DataSet via jaxb unmarshalling
@@ -53,15 +59,19 @@ public class App
 	         
             	event = cepServer.insert( event);
       	      	
-	            System.out.println("Rules Event-DeviceType <"+event.getDeviceType()+">");
+//	            System.out.println("Rules Event-DeviceType <"+event.getDeviceType()+">");
 	                     
 	            if ( event.getRequired() == 1 ) {
 	            	
-	            	System.out.println("Have to send the message " + event.toCSV());
+//	            	System.out.println("Have to send the message " + event.toCSV());
 	            	
 	            	producer.run(event);
+	            	
+	            	numberOutgoingMessage++;
 	            		
-	            } 
+	            }
+	            
+	            System.out.println("# of Messages in <"+numberIncomingMessages+"> & out <"+numberOutgoingMessage+">");
 	            	            
 			}
             
