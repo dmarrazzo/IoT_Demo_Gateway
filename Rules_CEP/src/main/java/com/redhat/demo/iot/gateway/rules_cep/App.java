@@ -7,6 +7,7 @@ import javax.jms.JMSException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.Marshaller;
 
 public class App 
 {
@@ -35,22 +36,20 @@ public class App
     	
     	tester.waitForBroker(sourceAMQBroker);
     	tester.waitForBroker(targetAMQBroker);
+
+    	JAXBContext  jaxbContext  = JAXBContext.newInstance(DataSet.class);
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        Marshaller	 marshaller   = jaxbContext.createMarshaller();
     	
 		Consumer consumer = new Consumer(sourceQueue, sourceAMQBroker, brokerUID, brokerPassword);
-		Producer producer = new Producer(targetQueue, targetAMQBroker, brokerUID, brokerPassword);
+		Producer producer = new Producer(targetQueue, targetAMQBroker, brokerUID, brokerPassword, marshaller);
 	
 		CepServer cepServer = new CepServer();
 
-	            JAXBContext jaxbContext = JAXBContext.newInstance(DataSet.class);
-	            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-
+		DataSet event = new DataSet();
 		
 		while ( true ) {
  
-                        if ( numberIncomingMessages % 500 == 0 ) {
-                              System.gc();
-                        }
-
 			messageFromQueue = consumer.run(20000);		
 			
 			numberIncomingMessages++;
@@ -59,17 +58,13 @@ public class App
 				
 	            // Convert TextMessage to DataSet via jaxb unmarshalling
 	            StringReader reader = new StringReader( messageFromQueue );
-	            DataSet event = (DataSet) unmarshaller.unmarshal(reader);
-		
+	            event = (DataSet) unmarshaller.unmarshal(reader);
+				
 	            event.setRequired(0);	    
 	         
             	event = cepServer.insert( event);
-      	      	
-//	            System.out.println("Rules Event-DeviceType <"+event.getDeviceType()+">");
-	                     
+	        	
 	            if ( event.getRequired() == 1 ) {
-	            	
-//	            	System.out.println("Have to send the message " + event.toCSV());
 	            	
 	            	producer.run(event);
 	            	
@@ -77,7 +72,7 @@ public class App
 	            		
 	            }
 
-                    reader.close();
+//                    reader.close();
 	            
 	            System.out.println("# of Messages in <"+numberIncomingMessages+"> & out <"+numberOutgoingMessage+">");
 	            	            
