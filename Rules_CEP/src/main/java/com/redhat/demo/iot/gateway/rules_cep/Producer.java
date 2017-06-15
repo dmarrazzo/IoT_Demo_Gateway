@@ -25,6 +25,8 @@ public class Producer {
 	 private String brokerURL	="";
 	 private String uid			= "";
 	 private String passwd		= "";
+	 private JAXBContext dataSetContext;
+	 private Marshaller dataSetMarshaller;
  
 	 public Producer(String queueName, String brokerURL, String uid, String passwd) throws JMSException
 	 {
@@ -46,6 +48,15 @@ public class Producer {
 		        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 		        Destination destination = session.createQueue(queueName);
 		        producer = session.createProducer(destination);
+		        
+	            try {
+					dataSetContext = JAXBContext.newInstance(DataSet.class);
+					dataSetMarshaller = dataSetContext.createMarshaller();
+				} catch (JAXBException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			} catch (JMSException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -58,8 +69,8 @@ public class Producer {
          StringWriter sw = new StringWriter();
          
          try {
-             JAXBContext dataSetContext = JAXBContext.newInstance(DataSet.class);
-             Marshaller dataSetMarshaller = dataSetContext.createMarshaller();
+//             JAXBContext dataSetContext = JAXBContext.newInstance(DataSet.class);
+//             Marshaller dataSetMarshaller = dataSetContext.createMarshaller();
              dataSetMarshaller.marshal(data, sw);
              result = sw.toString();
          } catch (JAXBException e) {
@@ -101,3 +112,4 @@ public class Producer {
         }
     }
 }
+

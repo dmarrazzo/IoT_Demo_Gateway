@@ -40,8 +40,17 @@ public class App
 		Producer producer = new Producer(targetQueue, targetAMQBroker, brokerUID, brokerPassword);
 	
 		CepServer cepServer = new CepServer();
+
+	            JAXBContext jaxbContext = JAXBContext.newInstance(DataSet.class);
+	            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+
 		
 		while ( true ) {
+ 
+                        if ( numberIncomingMessages % 500 == 0 ) {
+                              System.gc();
+                        }
+
 			messageFromQueue = consumer.run(20000);		
 			
 			numberIncomingMessages++;
@@ -49,9 +58,6 @@ public class App
 			if ( messageFromQueue != null ) {
 				
 	            // Convert TextMessage to DataSet via jaxb unmarshalling
-	            JAXBContext jaxbContext = JAXBContext.newInstance(DataSet.class);
-	            Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-	
 	            StringReader reader = new StringReader( messageFromQueue );
 	            DataSet event = (DataSet) unmarshaller.unmarshal(reader);
 		
@@ -70,6 +76,8 @@ public class App
 	            	numberOutgoingMessage++;
 	            		
 	            }
+
+                    reader.close();
 	            
 	            System.out.println("# of Messages in <"+numberIncomingMessages+"> & out <"+numberOutgoingMessage+">");
 	            	            

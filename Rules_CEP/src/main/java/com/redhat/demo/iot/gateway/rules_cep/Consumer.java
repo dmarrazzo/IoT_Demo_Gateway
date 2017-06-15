@@ -18,9 +18,24 @@ public class Consumer  implements ExceptionListener  {
 	private Session						session;
 	private Destination					destination;
 	private MessageConsumer				consumer;
+	private String						queueName;
+	private String						brokerURL;
+	private String						uid;
+	private String						passwd;
 	
 	public Consumer(String queueName, String brokerURL, String uid, String passwd) throws JMSException {
-	     // Create a ConnectionFactory
+		
+		this.queueName = queueName;
+		this.brokerURL = brokerURL;
+		this.uid		= uid;
+		this.passwd		= passwd;
+		
+		init_consumer(queueName, brokerURL, uid, passwd);
+
+	}
+	
+	private void init_consumer(String queueName, String brokerURL, String uid, String passwd) throws JMSException {
+		  // Create a ConnectionFactory
         connectionFactory = new ActiveMQConnectionFactory(uid, passwd, brokerURL);
 
         // Create a Connection
@@ -37,7 +52,6 @@ public class Consumer  implements ExceptionListener  {
 
         // Create a MessageConsumer from the Session to the Topic or Queue
         consumer = session.createConsumer(destination);
-
 	}
 	
 	 public String run(int waitTimeout) {
@@ -55,6 +69,14 @@ public class Consumer  implements ExceptionListener  {
          } catch (Exception e) {
              System.out.println("Caught: " + e);
              e.printStackTrace();
+             System.out.println("---- Re-establishing connection ---");
+             try {
+				init_consumer(queueName, brokerURL, uid, passwd);
+			} catch (JMSException e1) {
+				System.out.println("Caught while trying to reconnect: " + e);
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
          }
          
          return text;
@@ -73,3 +95,4 @@ public class Consumer  implements ExceptionListener  {
 		
 	}
 }
+
