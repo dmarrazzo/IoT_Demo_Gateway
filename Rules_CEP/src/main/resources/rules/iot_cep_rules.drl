@@ -4,6 +4,7 @@ import com.redhat.demo.iot.gateway.rules_cep.DataSet;
 
 declare DataSet
 	@role ( event )
+	@expires ( 1m )
 end
 	
 rule "FirstData"

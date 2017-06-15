@@ -1,12 +1,13 @@
 package com.redhat.demo.iot.gateway.rules_cep;
 
-import java.util.Date;
-
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import org.kie.api.definition.type.Expires;
+
 @XmlRootElement(name = "dataSet")
 @XmlType(propOrder = { "timestamp", "deviceType", "deviceID", "payload", "count", "required", "average", "errorCode", "errorMessage" })
+@Expires("1m")
 public class DataSet {
 	private String	timestamp;
 	private String	deviceType;

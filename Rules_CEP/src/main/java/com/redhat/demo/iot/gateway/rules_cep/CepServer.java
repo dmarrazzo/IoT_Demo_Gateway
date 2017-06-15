@@ -7,6 +7,8 @@ import org.drools.core.time.SessionPseudoClock;
 import org.kie.api.KieServices;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.KieSessionConfiguration;
+import org.kie.api.runtime.conf.ClockTypeOption;
 import org.kie.api.runtime.rule.EntryPoint;
 import org.kie.api.runtime.rule.FactHandle;
 import org.kie.api.time.SessionClock;
@@ -30,8 +32,12 @@ public class CepServer {
     	// Load KieContainer from resources on classpath (i.e. kmodule.xml and rules).
 		kieContainer = kieServices.getKieClasspathContainer();
 
+		// Set Pseudo Clock
+		KieSessionConfiguration conf = kieServices.newKieSessionConfiguration();
+		conf.setOption(ClockTypeOption.get("pseudo"));
+		
 		// Initializing KieSession.
-		kieSession = kieContainer.newKieSession();
+		kieSession = kieContainer.newKieSession(conf);
     }
     
     public DataSet insert( DataSet event ) {
